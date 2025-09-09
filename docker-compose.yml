@@ -76,8 +76,32 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/user_conf.d/default.conf:ro
     restart: unless-stopped
 
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:cuda
+    container_name: open-webui
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    expose:
+      - "8080"
+    volumes:
+      - open-webui:/app/backend/data
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - CORS_ALLOW_ORIGIN=https://ai.marmelli.com
+      - WEBUI_URL=https://ai.marmelli.com
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
 volumes:
   redis-data:
+  open-webui:
 
 
 
