@@ -42,7 +42,11 @@ async def _reverse_proxy(request: Request, path: str, servers: List[OllamaServer
     request.app.state.backend_server_index = (index + 1) % len(servers)
 
     normalized_url = chosen_server.url.rstrip('/')
-    backend_url = f"{normalized_url}/api/{path}"
+    # Forward OpenAI-compatible endpoints directly to /v1 on the backend
+    if path.startswith("v1/"):
+        backend_url = f"{normalized_url}/{path}"
+    else:
+        backend_url = f"{normalized_url}/api/{path}"
 
     url = http_client.build_request(
         method=request.method,

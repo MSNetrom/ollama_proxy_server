@@ -88,7 +88,10 @@ async def lifespan(app: FastAPI):
     await create_initial_admin_user()
     await create_initial_servers()
 
-    app.state.http_client = httpx.AsyncClient()
+    # Increase timeouts to accommodate long non-streaming generations
+    app.state.http_client = httpx.AsyncClient(
+        timeout=httpx.Timeout(connect=10.0, read=300.0, write=300.0, pool=300.0)
+    )
 
     try:
         app.state.redis = redis.from_url(str(settings.REDIS_URL), encoding="utf-8", decode_responses=True)
