@@ -1,0 +1,83 @@
+services:
+  init-perms:
+    image: busybox:1.36
+    container_name: ollama_proxy_init_perms
+    command: ["sh", "-c", "mkdir -p /app/data && chmod -R 0777 /app/data"]
+    volumes:
+      - ./data:/app/data
+    restart: "no"
+
+  redis:
+    image: redis:7-alpine
+    container_name: ollama_proxy_redis
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.conda
+    container_name: ollama_proxy_app
+    # run as default user inside image (non-root)
+    depends_on:
+      init-perms:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Required app settings
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_USER=${ADMIN_USER}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      # IMPORTANT: Use host.docker.internal to reach host Ollama (override .env if needed)
+      - OLLAMA_SERVERS=http://host.docker.internal:11434
+      # Override .env so the app uses the redis service and persists SQLite
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=${LOG_LEVEL}
+      - PROXY_PORT=8080
+      - DATABASE_URL=sqlite+aiosqlite:////app/data/ollama_proxy.db
+      # Gunicorn overrides (optional)
+      - GUNICORN_WORKERS=${GUNICORN_WORKERS:-4}
+    volumes:
+      - ./data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    expose:
+      - "8080"
+    ports:
+      - "127.0.0.1:8081:8080"
+    restart: unless-stopped
+
+  nginx:
+    image: jonasal/nginx-certbot:latest
+    container_name: ollama_proxy_nginx
+    depends_on:
+      - app
+    environment:
+      # Required by jonasal/nginx-certbot
+      - CERTBOT_EMAIL=${CERTBOT_EMAIL}
+      - STAGING=${CERTBOT_STAGING:-false}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Persist certificates
+      - ./data/letsencrypt:/etc/letsencrypt
+      # Our nginx config
+      - ./nginx/nginx.conf:/etc/nginx/user_conf.d/default.conf:ro
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+
+
+
