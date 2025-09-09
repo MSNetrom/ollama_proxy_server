@@ -100,6 +100,8 @@ def _build_logging_config(log_level: str = "INFO") -> dict:
             "uvicorn.access": {"handlers": ["default"], "level": level, "propagate": False},
             "gunicorn.error": {"handlers": ["default"], "level": level, "propagate": False},
             "gunicorn.access": {"handlers": ["default"], "level": level, "propagate": False},
+            # Silence noisy passlib bcrypt backend version warnings without changing dependencies
+            "passlib.handlers.bcrypt": {"handlers": ["default"], "level": "ERROR", "propagate": False},
         },
     }
 

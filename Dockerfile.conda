@@ -1,0 +1,24 @@
+FROM mambaorg/micromamba:1.5.10
+
+# Create working directory
+WORKDIR /app
+
+# Copy environment spec and requirements first for better caching
+COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml requirements.txt /tmp/
+
+# Create the conda environment using micromamba
+RUN micromamba create -y -n ollama-proxy -f /tmp/environment.yml && \
+    micromamba clean --all --yes
+
+# Use the environment for subsequent commands
+SHELL ["micromamba", "run", "-n", "ollama-proxy", "/bin/bash", "-lc"]
+
+# Copy application code
+COPY --chown=$MAMBA_USER:$MAMBA_USER . /app
+
+# Expose app port
+EXPOSE 8080
+
+# Default command: run via gunicorn with our config
+CMD ["micromamba", "run", "-n", "ollama-proxy", "gunicorn", "-c", "gunicorn_conf.py", "app.main:app", "--bind", "0.0.0.0:8080"]
+
