@@ -74,15 +74,14 @@ services:
       - ./data/letsencrypt:/etc/letsencrypt
       # Our nginx config
       - ./nginx/nginx.conf:/etc/nginx/user_conf.d/default.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
   openwebui:
     image: ghcr.io/open-webui/open-webui:cuda
     container_name: open-webui
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    expose:
-      - "8080"
+    network_mode: "host"
     volumes:
       - open-webui:/app/backend/data
     environment:
@@ -90,7 +89,7 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - CORS_ALLOW_ORIGIN=https://ai.marmelli.com
       - WEBUI_URL=https://ai.marmelli.com
-      - OLLAMA_API_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_API_BASE_URL=http://127.0.0.1:11434
     deploy:
       resources:
         reservations:
