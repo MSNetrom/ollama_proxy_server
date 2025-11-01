@@ -9,4 +9,4 @@ ollama create gpt-oss:20b-65k -f gpt-oss_modelfile
 ollama create bge-m3:latest-8k -f bge-m3_modelfile
 ollama create gemma3:12b-65k -f gemma3_modelfile
 ollama create qwen3:14b-65k -f qwen3_modelfile
-ollama create qwen3-vl:30b -f qwen3_vl_modelfile
+ollama create qwen3-vl:30b-65k -f qwen3_vl_modelfile
