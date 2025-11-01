@@ -99,3 +99,5 @@ ollama_proxy.db
 
 # setup state
 .setup_state
+
+data

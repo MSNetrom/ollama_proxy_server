@@ -1,0 +1,3 @@
+FROM bge-m3:latest
+PARAMETER num_ctx 8196
+PARAMETER num_predict -1

@@ -19,10 +19,10 @@ def get_env(name: str, required: bool = True, default: Optional[str] = None) -> 
 
 def main() -> None:
     # Required for any OpenAI-compatible endpoint
-    api_key = ""
+    api_key = "op_7dfba04bd7bf9c17_2f5437fb777a32377a24f39cf175b76e3b11a12f6cd67685"
 
     # Optional: point to a custom endpoint (must expose OpenAI-compatible /v1 APIs)
-    base_url = "http://svendgaard.ddns.net:13000/api/v1/"
+    base_url = "https://ai.marmelli.com/ollamapi/v1"
 
     # Choose a model
     model = os.getenv("OPENAI_MODEL", "gpt-oss:20b")

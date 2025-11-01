@@ -38,7 +38,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - ADMIN_USER=${ADMIN_USER}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      # IMPORTANT: Use host.docker.internal to reach host Ollama (override .env if needed)
+      # Connect to host-managed Ollama instance
       - OLLAMA_SERVERS=http://host.docker.internal:11434
       # Override .env so the app uses the redis service and persists SQLite
       - REDIS_URL=redis://redis:6379/0
@@ -90,6 +90,7 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - CORS_ALLOW_ORIGIN=https://ai.marmelli.com
       - WEBUI_URL=https://ai.marmelli.com
+      - OLLAMA_API_BASE_URL=http://host.docker.internal:11434
     deploy:
       resources:
         reservations:
